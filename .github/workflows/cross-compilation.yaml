@@ -1,0 +1,33 @@
+name: cross compilation
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+
+  crosscompile:
+    name: Cross Compile Go with CGO using Zig
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+      - name: Download Zig
+        run:  curl -LO https://ziglang.org/builds/zig-linux-x86_64-0.13.0.tar.xz
+      - name: Extract tar archive
+        run: tar -xf zig-linux-x86_64-0.13.0.tar.xz
+      - name: Rename archive
+        run: mv zig-linux-x86_64-0.13.0 zig-lib-and-binary
+      - name: Copy archive to PATH
+        run: cp zig-lib-and-binary/zig /usr/local/bin/zig && cp -ar zig-lib-and-binary/lib/ /usr/local/
+      - name: Cross Compile
+        run: CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC="zig cc -target aarch64-linux-musl" go build main.go
+      - name: Display executable information
+        run: echo 'Machine Info:' && uname -m && echo 'Executable Info:' && file main
