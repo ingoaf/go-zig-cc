@@ -6,9 +6,7 @@ on:
   pull_request:
     branches:
       - master
-
 jobs:
-
   crosscompile:
     name: Cross Compile Go with CGO using Zig
     runs-on: ubuntu-latest
